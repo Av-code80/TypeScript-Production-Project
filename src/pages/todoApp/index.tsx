@@ -8,8 +8,7 @@ const TodoApp = () => {
   const [todoDescription, setTodoDescription] = useState("");
   const authState = useSelector(authSelector);
   const todoState = useSelector(todoSelector);
-  console.log(todoState, "todoState");
-
+  console.log(todoState, "todoState**");
   const dispatch = useDispatch();
 
   if (!authState.token) {
@@ -19,9 +18,10 @@ const TodoApp = () => {
   const handleTodoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTodoDescription(event.target.value);
   };
+
   const onAddClick = () => {
     dispatch(addTaskAction({ description: todoDescription }));
-    setTodoDescription("")
+    setTodoDescription("");
   };
 
   return (
@@ -36,7 +36,11 @@ const TodoApp = () => {
             className="border p-1 pl-2 bg-orange-100 w-full"
             type="text"
           />
-          <button type="button" onClick={onAddClick}>
+          <button
+            type="button"
+            className="p-2 mt-1 bg-green-300 rounded hover:bg-green-500 hover:text-white border border-gray-300"
+            onClick={onAddClick}
+          >
             Add
           </button>
         </form>
@@ -44,13 +48,16 @@ const TodoApp = () => {
         <div className="mt-10">
           {todoState?.todos?.map((item) => {
             return (
-              <div key={item._id} className="flex text-purple-800 p-2 bg-gray-100 justify-between h-40 border">
-                <p>{item.description}</p>
-                <div className="text-white">
-                  <button className="mr-5 p-2 bg-blue-400 hover:bg-blue-600 border border-gray-300">
+              <div
+                key={item._id}
+                className="flex text-purple-800 p-4 bg-gray-100 justify-between h-15 border"
+              >
+                <p className="pt-1">{item.description}</p>
+                <div>
+                  <button className="mr-5 text-black p-2 hover:text-white bg-blue-400 rounded hover:bg-blue-600 border border-gray-300">
                     Done
                   </button>
-                  <button className="border p-2 bg-red-400 hover:bg-red-600  border-gray-300">
+                  <button className="border text-black hover:text-white p-2 bg-red-400 rounded hover:bg-red-600  border-gray-300">
                     Remove
                   </button>
                 </div>

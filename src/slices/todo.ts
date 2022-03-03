@@ -1,7 +1,7 @@
 import {
   createAsyncThunk,
   createSlice,
-  //SerializedError,
+  SerializedError,
 } from "@reduxjs/toolkit";
 import call from "../gate";
 
@@ -15,7 +15,7 @@ interface InitialState {
     updatedAt: string;
     __v: number;
   }[];
-  error?: string;
+  error?: SerializedError;
   loading?: boolean;
 }
 
@@ -41,13 +41,28 @@ export const addTaskAction = createAsyncThunk<
   try {
     const { description } = data;
     console.log(description, "description**");
-    
+
     const res = await call("post", "/task", { description });
     return res;
   } catch (error: any) {
     throw new Error(error);
   }
 });
+
+// getAllTaskAction
+export const getAllTaskAction = createAsyncThunk<
+AddTodoResponse, 
+{ token: string }
+>("all/task", async (data): Promise<AddTodoResponse> => {
+  try{
+    const { token } = data;
+    const res = call("get", "/task", { token })
+    return res
+  }
+  catch(error: any) {
+    throw new Error(error)
+  }
+})
 
 const initialState: InitialState = {
   todos: [],
@@ -64,7 +79,15 @@ export const todoSlice = createSlice({
       state.loading = true;
     });
     builder.addCase(addTaskAction.fulfilled, (state, action) => {
-      state.todos?.push(action.payload.data)
+      state.todos?.push(action.payload.data);
+      state.error = undefined;
+      state.loading = false;
     });
+    builder.addCase(addTaskAction.rejected, (state, action) => {
+      state.error = action.error;
+      state.loading = false;
+    });
+    // getAllTaskAction
+    
   },
 });
