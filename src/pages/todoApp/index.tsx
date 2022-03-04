@@ -1,15 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { authSelector, todoSelector } from "../../selectors";
-import { addTaskAction } from "../../slices/todo";
+import { authSelector, removeSelector, todoSelector } from "../../selectors";
+import { addTaskAction, getAllTaskAction } from "../../slices/todo";
 
 const TodoApp = () => {
   const [todoDescription, setTodoDescription] = useState("");
   const authState = useSelector(authSelector);
   const todoState = useSelector(todoSelector);
-  console.log(todoState, "todoState**");
+  const removeState = useSelector(removeSelector);
+  console.log(todoState.todos, "todos**");
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllTaskAction());
+  }, []);
 
   if (!authState.token) {
     return <Navigate to="/login" state={{ from: "/todo" }} replace />;
@@ -21,7 +26,12 @@ const TodoApp = () => {
 
   const onAddClick = () => {
     dispatch(addTaskAction({ description: todoDescription }));
+    dispatch(getAllTaskAction()); // get all item after adding new item
     setTodoDescription("");
+  };
+
+  const onRemoveClick = () => {
+    console.log("remove");
   };
 
   return (
@@ -45,7 +55,7 @@ const TodoApp = () => {
           </button>
         </form>
 
-        <div className="mt-10">
+        <div className="mt-10 font-semibold">
           {todoState?.todos?.map((item) => {
             return (
               <div
@@ -57,7 +67,10 @@ const TodoApp = () => {
                   <button className="mr-5 text-black p-2 hover:text-white bg-blue-400 rounded hover:bg-blue-600 border border-gray-300">
                     Done
                   </button>
-                  <button className="border text-black hover:text-white p-2 bg-red-400 rounded hover:bg-red-600  border-gray-300">
+                  <button
+                    onClick={onRemoveClick}
+                    className="border text-black hover:text-white p-2 bg-red-400 rounded hover:bg-red-600  border-gray-300"
+                  >
                     Remove
                   </button>
                 </div>

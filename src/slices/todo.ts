@@ -29,7 +29,7 @@ interface AddTodoResponse {
     createdAt: string;
     updatedAt: string;
     __v: number;
-  };
+  }[];
 }
 
 export const addTaskAction = createAsyncThunk<
@@ -50,19 +50,30 @@ export const addTaskAction = createAsyncThunk<
 });
 
 // getAllTaskAction
-export const getAllTaskAction = createAsyncThunk<
-AddTodoResponse, 
-{ token: string }
->("all/task", async (data): Promise<AddTodoResponse> => {
-  try{
-    const { token } = data;
-    const res = call("get", "/task", { token })
-    return res
+export const getAllTaskAction = createAsyncThunk<AddTodoResponse>(
+  "all/task",
+  async (data): Promise<AddTodoResponse> => {
+    try {
+      const res = call("get", "/task", {});
+      return res;
+    } catch (error: any) {
+      throw new Error(error);
+    }
   }
-  catch(error: any) {
-    throw new Error(error)
+);
+
+// deleteTaskAction
+export const deleteTaskAction = createAsyncThunk<AddTodoResponse>(
+  "delete/task",
+  async (data): Promise<AddTodoResponse> => {
+    try {
+      const res = call("delete", `/task/${_id}`, {});
+      return res;
+    } catch (error: any) {
+      throw new Error(error);
+    }
   }
-})
+);
 
 const initialState: InitialState = {
   todos: [],
@@ -79,7 +90,7 @@ export const todoSlice = createSlice({
       state.loading = true;
     });
     builder.addCase(addTaskAction.fulfilled, (state, action) => {
-      state.todos?.push(action.payload.data);
+      // state.todos = action.payload.data;
       state.error = undefined;
       state.loading = false;
     });
@@ -88,6 +99,18 @@ export const todoSlice = createSlice({
       state.loading = false;
     });
     // getAllTaskAction
-    
+    builder.addCase(getAllTaskAction.pending, (state, action) => {
+      state.loading = true;
+    });
+    builder.addCase(getAllTaskAction.fulfilled, (state, action) => {
+      state.todos = action.payload.data;
+      state.error = undefined;
+      state.loading = false;
+    });
+    builder.addCase(getAllTaskAction.rejected, (state, action) => {
+      state.error = action.error;
+      state.loading = false;
+    });
+    // deleteTaskAction
   },
 });
