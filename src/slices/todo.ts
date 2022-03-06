@@ -15,6 +15,7 @@ interface InitialState {
     updatedAt: string;
     __v: number;
   }[];
+  // data?: {};
   error?: SerializedError;
   loading?: boolean;
 }
@@ -31,18 +32,23 @@ interface AddTodoResponse {
     __v: number;
   }[];
 }
+interface deleteTodoResponse {
+  succes: boolean;
+  message?: string;
+  data?: {};
+}
 
 export const addTaskAction = createAsyncThunk<
   AddTodoResponse,
   {
     description: string;
+    dispatch: any;
   }
 >("todo/add", async (data): Promise<AddTodoResponse> => {
   try {
-    const { description } = data;
-    console.log(description, "description**");
-
+    const { description, dispatch } = data;
     const res = await call("post", "/task", { description });
+    dispatch(getAllTaskAction()); // get all item after adding new item
     return res;
   } catch (error: any) {
     throw new Error(error);
@@ -52,9 +58,9 @@ export const addTaskAction = createAsyncThunk<
 // getAllTaskAction
 export const getAllTaskAction = createAsyncThunk<AddTodoResponse>(
   "all/task",
-  async (data): Promise<AddTodoResponse> => {
+  async (): Promise<AddTodoResponse> => {
     try {
-      const res = call("get", "/task", {});
+      const res = await call("get", "/task", {});
       return res;
     } catch (error: any) {
       throw new Error(error);
@@ -63,17 +69,34 @@ export const getAllTaskAction = createAsyncThunk<AddTodoResponse>(
 );
 
 // deleteTaskAction
-export const deleteTaskAction = createAsyncThunk<AddTodoResponse>(
-  "delete/task",
-  async (data): Promise<AddTodoResponse> => {
-    try {
-      const res = call("delete", `/task/${_id}`, {});
-      return res;
-    } catch (error: any) {
-      throw new Error(error);
-    }
+export const deleteTaskAction = createAsyncThunk<
+  deleteTodoResponse,
+  { _id: string; dispatch: any }
+>("delete/task", async (data): Promise<deleteTodoResponse> => {
+  try {
+    const { _id, dispatch } = data;
+    const res = await call("delete", `/task/${_id}`, { _id });
+    dispatch(getAllTaskAction());
+    return res;
+  } catch (error: any) {
+    throw new Error(error);
   }
-);
+});
+
+//updateTaskAction
+export const updateTaskAction = createAsyncThunk<
+  AddTodoResponse,
+  { completed: boolean; _id: string; dispatch: any }
+>("todo/put", async (data): Promise<AddTodoResponse> => {
+  try {
+    const { completed, _id, dispatch } = data;
+    const res = await call("put", `/task/${_id}`, { completed });
+    dispatch(getAllTaskAction());
+    return res;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+});
 
 const initialState: InitialState = {
   todos: [],
@@ -90,7 +113,6 @@ export const todoSlice = createSlice({
       state.loading = true;
     });
     builder.addCase(addTaskAction.fulfilled, (state, action) => {
-      // state.todos = action.payload.data;
       state.error = undefined;
       state.loading = false;
     });
@@ -112,5 +134,28 @@ export const todoSlice = createSlice({
       state.loading = false;
     });
     // deleteTaskAction
+    builder.addCase(deleteTaskAction.pending, (state, action) => {
+      state.loading = true;
+    });
+    builder.addCase(deleteTaskAction.fulfilled, (state, action) => {
+      state.error = undefined;
+      state.loading = false;
+    });
+    builder.addCase(deleteTaskAction.rejected, (state, action) => {
+      state.error = action.error;
+      state.loading = false;
+    });
+    //updateTaskAction
+    builder.addCase(updateTaskAction.pending, (state, action) => {
+      state.loading = true;
+    });
+    builder.addCase(updateTaskAction.fulfilled, (state, action) => {
+      state.error = undefined;
+      state.loading = false;
+    });
+    builder.addCase(updateTaskAction.rejected, (state, action) => {
+      state.error = action.error;
+      state.loading = false;
+    });
   },
 });
