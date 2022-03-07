@@ -8,19 +8,21 @@ import {
   getAllTaskAction,
   updateTaskAction,
 } from "../../slices/todo";
+import cn from "classnames";
 
- interface Task {
-   completed: boolean;
-   _id: string;
-   description: string;
-   owner: string;
-   createdAt: string;
-   updatedAt: string;
-   __v: number;
- }
+interface Task {
+  completed: boolean;
+  _id: string;
+  description: string;
+  owner: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
 
 const TodoApp = () => {
   const [todoDescription, setTodoDescription] = useState("");
+  const [modifyItem, setModifyItem] = useState<Task>({} as Task);
   const authState = useSelector(authSelector);
   const todoState = useSelector(todoSelector);
   console.log(todoState.todos, "todos**");
@@ -29,6 +31,10 @@ const TodoApp = () => {
   useEffect(() => {
     dispatch(getAllTaskAction());
   }, [dispatch]);
+
+  useEffect(() => {
+    setModifyItem({} as Task);
+  }, [todoState.todos]);
 
   if (!authState.token) {
     return <Navigate to="/login" state={{ from: "/todo" }} replace />;
@@ -49,31 +55,58 @@ const TodoApp = () => {
 
   const onDoneClick = (item: Task) => {
     dispatch(
-      updateTaskAction({ _id: item._id, completed: !item.completed, dispatch })
+      updateTaskAction({
+        _id: item._id,
+        dispatch: dispatch,
+        body: {
+          completed: !item.completed,
+        },
+      })
     );
   };
 
-  // const onEditClick = (item: Task) => {
-  //   dispatch(
-  //     updateTaskAction({_id: item._id,  dispatch })
-  //   );
-  // }
+  const onEditClick = (item: Task) => {
+    setModifyItem(item);
+  };
+  console.log(modifyItem);
+
+  const onCancelClick = () => {
+    setModifyItem({} as Task);
+  };
+
+  const onSaveClick = (item: Task) => {
+    dispatch(
+      updateTaskAction({
+        _id: item._id,
+        dispatch,
+        body: {
+          description: modifyItem.description,
+        },
+      })
+    );
+    console.log(modifyItem, "modifyItem");
+  };
 
   return (
-    <div className="w-full flex flex-col border-2 p-4 justify-center items-center">
-      <h1 className="font-bold text-gray-500">Todo-Homepage</h1>
-      <div className="flex flex-col w-full p-10">
-        <h2>Add Todo</h2>
+    <div className=" flex flex-col border-2  justify-center items-center">
+      <header className="w-screen h-20 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+        <h1 className="font-bold my-6 text-center text-gray-50">
+          Todo-Homepage
+        </h1>
+      </header>
+
+      <div className="flex flex-col w-4/6 p-10">
+        <h2 className="font-semibold">Add Todo</h2>
         <form className="w-full">
           <input
             value={todoDescription}
             onChange={handleTodoChange}
-            className="border p-1 pl-2 bg-orange-100 w-full"
+            className="border p-1 pl-2 hover:bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 w-full"
             type="text"
           />
           <button
             type="button"
-            className="p-2 mt-1 bg-green-300 rounded hover:bg-green-500 hover:text-white border border-gray-300"
+            className="p-4 mt-1 font-semibold bg-green-400 rounded hover:bg-green-200 hover:text-black text-white border border-gray-300"
             onClick={onAddClick}
           >
             Add
@@ -81,43 +114,73 @@ const TodoApp = () => {
         </form>
 
         <div className="mt-10 font-semibold">
-          {!todoState.loading ? (
-            todoState?.todos?.map((item) => {
-              return (
-                <div
-                  key={item._id}
-                  className="flex text-purple-800 p-4 bg-gray-100 justify-between h-15 border"
-                >
-                  {/* {item.completed ? (
-                    <p className="pt-1 line-through">{item.description}</p>
-                  ) : (
-                    <p className="pt-1">{item.description}</p>
-                  )} */}
-                  <p className={"pt-1 " + (item.completed ? "line-through" : "" )}>{item.description}</p>
+          {todoState?.todos?.map((item) => {
+            return (
+              <div
+                key={item._id}
+                className="flex text-purple-800 mb-2 p-4 rounded selection: bg-gray-50 justify-between h-15 border"
+              >
+                {modifyItem?._id !== item._id ? (
+                  <p className={cn("pt-1", { "line-through": item.completed })}>
+                    {item.description}
+                  </p>
+                ) : (
+                  <input
+                    className="p-2 hover:bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 "
+                    value={modifyItem.description}
+                    onChange={(event) =>
+                      setModifyItem((prevState) => {
+                        return {
+                          ...prevState,
+                          description: event.target.value,
+                        };
+                      })
+                    }
+                  />
+                )}
+                {modifyItem?._id === item._id ? (
+                  <div>
+                    <button
+                      onClick={() => onSaveClick(item)}
+                      className="mr-5 text-white p-2 hover:text-black bg-violet-400 rounded hover:bg-violet-300 border border-gray-300"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={onCancelClick}
+                      className="border text-white hover:text-black p-2 bg-pink-400 rounded hover:bg-pink-300  border-gray-300"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
                   <div>
                     <button
                       onClick={() => onDoneClick(item)}
-                      className="mr-5 text-black p-2 hover:text-white bg-blue-400 rounded hover:bg-blue-600 border border-gray-300"
+                      className="mr-5 text-white p-2 hover:text-black bg-blue-400 rounded hover:bg-blue-300 border border-gray-300"
                     >
                       {!item.completed ? "Done" : "Undone"}
                     </button>
                     <button
+                      onClick={() => onEditClick(item)}
+                      className="mr-5 text-white p-2 hover:text-black bg-orange-400 rounded hover:bg-orange-300 border border-gray-300"
+                    >
+                      Modify
+                    </button>
+                    <button
                       onClick={() => onRemoveClick(item._id)}
-                      className="border text-black hover:text-white p-2 bg-red-400 rounded hover:bg-red-600  border-gray-300"
+                      className="border text-white hover:text-black p-2 bg-red-400 rounded hover:bg-red-300  border-gray-300"
                     >
                       Remove
                     </button>
                   </div>
-                </div>
-              );
-            })
-          ) : (
-            <div>loading</div>
-          )}
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 };
-
 export default TodoApp;

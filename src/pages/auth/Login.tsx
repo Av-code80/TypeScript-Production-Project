@@ -107,7 +107,7 @@ const Login = () => {
           className={cn(
             "bg-orange-200 hover:bg-orange-300 hover:text-white text-red-600 font-semibold",
             {
-              "border-2 border-red-600": !!auth.error, //?
+              "border-2 border-red-600": !!auth.error, 
             }
           )}
           type="submit"

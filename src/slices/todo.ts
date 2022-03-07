@@ -15,7 +15,6 @@ interface InitialState {
     updatedAt: string;
     __v: number;
   }[];
-  // data?: {};
   error?: SerializedError;
   loading?: boolean;
 }
@@ -86,11 +85,19 @@ export const deleteTaskAction = createAsyncThunk<
 //updateTaskAction
 export const updateTaskAction = createAsyncThunk<
   AddTodoResponse,
-  { completed: boolean; _id: string; dispatch: any }
+  {
+    _id: string;
+    dispatch: any;
+    body: {
+      description?: string;
+      completed?: boolean;
+    };
+  }
 >("todo/put", async (data): Promise<AddTodoResponse> => {
   try {
-    const { completed, _id, dispatch } = data;
-    const res = await call("put", `/task/${_id}`, { completed });
+    const { _id, dispatch, body } = data;
+
+    const res = await call("put", `/task/${_id}`, body);
     dispatch(getAllTaskAction());
     return res;
   } catch (error: any) {
