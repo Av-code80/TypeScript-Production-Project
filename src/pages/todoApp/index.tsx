@@ -9,6 +9,8 @@ import {
   updateTaskAction,
 } from "../../slices/todo";
 import cn from "classnames";
+import { ToastContainer} from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface Task {
   completed: boolean;
@@ -45,12 +47,14 @@ const TodoApp = () => {
   };
 
   const onAddClick = () => {
-    dispatch(addTaskAction({ description: todoDescription, dispatch }));
-    setTodoDescription("");
+  
+      dispatch(addTaskAction({ description: todoDescription, dispatch }));
+      setTodoDescription("");
+     
   };
 
   const onRemoveClick = (_id: string) => {
-    dispatch(deleteTaskAction({ _id, dispatch }));
+      dispatch(deleteTaskAction({ _id, dispatch }));
   };
 
   const onDoneClick = (item: Task) => {
@@ -68,7 +72,6 @@ const TodoApp = () => {
   const onEditClick = (item: Task) => {
     setModifyItem(item);
   };
-  console.log(modifyItem);
 
   const onCancelClick = () => {
     setModifyItem({} as Task);
@@ -84,35 +87,37 @@ const TodoApp = () => {
         },
       })
     );
-    console.log(modifyItem, "modifyItem");
   };
 
   return (
-    <div className=" flex flex-col border-2  justify-center items-center">
+    <div className="flex flex-col border-2  justify-center items-center">
       <header className="w-screen h-20 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
         <h1 className="font-bold my-6 text-center text-gray-50">
           Todo-Homepage
         </h1>
       </header>
-
       <div className="flex flex-col w-4/6 p-10">
-        <h2 className="font-semibold">Add Todo</h2>
+        <h2 className="text-purple-800 font-bold">Add Todo</h2>
         <form className="w-full">
           <input
             value={todoDescription}
             onChange={handleTodoChange}
-            className="border p-1 pl-2 hover:bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 w-full"
+            className="border p-1 pl-2 hover:bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 w-full"
             type="text"
           />
           <button
             type="button"
-            className="p-4 mt-1 font-semibold bg-green-400 rounded hover:bg-green-200 hover:text-black text-white border border-gray-300"
+            className={
+              "p-4 mt-1 font-semibold bg-green-400 rounded hover:bg-green-200 hover:text-black text-white border border-gray-300"
+            }
             onClick={onAddClick}
           >
             Add
           </button>
         </form>
-
+        <div>
+          <ToastContainer />
+        </div>
         <div className="mt-10 font-semibold">
           {todoState?.todos?.map((item) => {
             return (
@@ -126,7 +131,7 @@ const TodoApp = () => {
                   </p>
                 ) : (
                   <input
-                    className="p-2 hover:bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 "
+                    className="p-2 hover:bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 "
                     value={modifyItem.description}
                     onChange={(event) =>
                       setModifyItem((prevState) => {

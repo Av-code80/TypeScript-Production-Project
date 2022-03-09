@@ -4,7 +4,8 @@ import {
   SerializedError,
 } from "@reduxjs/toolkit";
 import call from "../gate";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 interface InitialState {
   todos?: {
     completed: boolean;
@@ -48,8 +49,13 @@ export const addTaskAction = createAsyncThunk<
     const { description, dispatch } = data;
     const res = await call("post", "/task", { description });
     dispatch(getAllTaskAction()); // get all item after adding new item
+    toast.success("Item added successfully 👋", {
+      autoClose: 2000,
+      delay: 1000,
+    });
     return res;
   } catch (error: any) {
+    toast.error("Error by adding item!");
     throw new Error(error);
   }
 });
@@ -76,8 +82,13 @@ export const deleteTaskAction = createAsyncThunk<
     const { _id, dispatch } = data;
     const res = await call("delete", `/task/${_id}`, { _id });
     dispatch(getAllTaskAction());
+    toast.success("Item removed successfully 👋", {
+      autoClose: 2000,
+      delay: 1000,
+    });
     return res;
   } catch (error: any) {
+    toast.error("Error by deleting item!");
     throw new Error(error);
   }
 });
@@ -98,7 +109,15 @@ export const updateTaskAction = createAsyncThunk<
     const { _id, dispatch, body } = data;
 
     const res = await call("put", `/task/${_id}`, body);
-    dispatch(getAllTaskAction());
+    if (dispatch) {
+      dispatch(getAllTaskAction());
+      toast.success("Item updated successfully 👋", {
+        autoClose: 2000,
+        delay: 1000,
+      });
+    } else {
+      toast.error("Error updating!");
+    }
     return res;
   } catch (error: any) {
     throw new Error(error);

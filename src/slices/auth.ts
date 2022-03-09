@@ -4,7 +4,8 @@ import {
   SerializedError,
 } from "@reduxjs/toolkit";
 import call from "../gate";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 interface AuthState {
   user?: {
     age: number;
@@ -30,7 +31,6 @@ interface AuthResponse {
     updatedAt: string;
   };
 }
-
 interface LogoutResponse {
   success: boolean;
 }
@@ -43,9 +43,17 @@ export const loginAction = createAsyncThunk<
     const { email, password } = data;
     const res = await call("post", "/user/login", { email, password });
     localStorage.setItem("localStorageAuth", JSON.stringify(res));
+    toast.success("Welcom to your account 👋", {
+      autoClose: 2000,
+      delay: 500,
+    });
     return res;
   } catch (error: any) {
+    toast.error(
+      "⚠️ Error in authuntification, please enter valid email & password or subscribe"
+    );
     throw new Error(error);
+   
   }
 });
 
@@ -68,18 +76,42 @@ export const registerAction = createAsyncThunk<
   }
 });
 
-export const logoutAction = createAsyncThunk<LogoutResponse, {}>(
+export const logoutAction = createAsyncThunk<AuthResponse, {}>(
   "auth/logout",
-  async (): Promise<LogoutResponse> => {
+  async (): Promise<AuthResponse> => {
     try {
       const res = await call("post", "/user/logout", {});
       localStorage.removeItem("localStorageAuth");
+      toast.success("Logout successfully 👋", {
+        autoClose: 2000,
+        delay: 500,
+      });
       return res;
     } catch (error: any) {
+      toast.error("Error in logout");
       throw new Error(error);
     }
   }
-) 
+);
+
+export const deleteAccountAction = createAsyncThunk<LogoutResponse, {}>(
+  "auth/delete",
+  async (): Promise<LogoutResponse> => {
+    try {
+      const res = await call("delete", "/user/me", {});
+      localStorage.removeItem("localStorageAuth");
+      toast.success("Your account is deleted successfully 👋", {
+        autoClose: 1000,
+        delay: 1000,
+      });
+      return res;
+    } catch (error: any) {
+      toast.error("Error in deleting account");
+      throw new Error(error);
+    }
+  }
+);
+
 const initialState: AuthState = {
   error: undefined,
   user: localStorage.getItem("localStorageAuth")?.length
@@ -89,7 +121,7 @@ const initialState: AuthState = {
     ? JSON.parse(localStorage.getItem("localStorageAuth") || "")?.token
     : undefined,
 
- loading: false,
+  loading: false,
 };
 
 export const authSlice = createSlice({

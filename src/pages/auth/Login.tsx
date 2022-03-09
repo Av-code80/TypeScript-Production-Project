@@ -1,10 +1,15 @@
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { authSelector } from "../../selectors";
-import { loginAction, logoutAction } from "../../slices/auth";
+import {
+  deleteAccountAction,
+  loginAction,
+  logoutAction,
+} from "../../slices/auth";
 import cn from "classnames";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { ToastContainer } from "react-toastify";
 
 interface LocationState {
   from: string;
@@ -60,25 +65,52 @@ const Login = () => {
     dispatch(logoutAction({}));
   };
 
+  const handleDeleteAccount = () => {
+    dispatch(deleteAccountAction({}));
+  };
+
   return (
     <>
-      <div className="flex flex-row bg-orange-200 p-2">
-        {!auth.loading && auth?.user?.name?.length && (
-          <div className="text-sm font-semibold pt-2 justify-around text-gray-600">Hi {auth.user.name}</div>
-        )}
-        <button
-          onClick={handleLogout}
-          disabled={!auth.token}
-          className="p-2 flex ml-20 font-semibold bg-gray-300 hover:text-red-500 hover:bg-gray-400 rounded w-fit"
-        >
-          Logout
-        </button>
-      </div>
+      <header className="flex flex-col bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 p-2">
+        <div>
+          <ToastContainer />
+        </div>
+        <div className="flex flex-row justify-between items-center">
+          <div className=" flex flex-row ">
+            {!auth.loading && auth?.user?.name?.length && (
+              <div className="text-sm mr-8 mt-2 font-semibold text-gray-100">
+                Hi {auth.user.name}
+              </div>
+            )}
+            <div>
+              <button
+                onClick={handleLogout}
+                disabled={!auth.token}
+                className="p-2 font-semibold bg-gray-300 hover:text-red-500 hover:bg-gray-400 rounded"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+          <div className="">
+            <button
+              onClick={handleDeleteAccount}
+              disabled={!auth.token}
+              className="p-2 font-semibold bg-gray-400 text-red-500 hover:text-red-300 hover:bg-gray-500 rounded"
+            >
+              Delet account!
+            </button>
+          </div>
+        </div>
+      </header>
       <form
         onSubmit={formik.handleSubmit}
-        className="flex w-1/3 border-gray-200 bg-gray-200 rounded my-15 mx-auto border flex-col m-10"
+        className="flex w-1/3 border-gray-200 bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 rounded mt-24 mx-auto border flex-col m-10"
       >
-        <label className="my-0 mx-auto text-gray-500 " htmlFor="email">
+        <label
+          className="my-0 font-semibold mx-auto text-gray-500 "
+          htmlFor="email"
+        >
           Email and Password
         </label>
         <input
@@ -105,9 +137,9 @@ const Login = () => {
         ) : null}
         <button
           className={cn(
-            "bg-orange-200 hover:bg-orange-300 hover:text-white text-red-600 font-semibold",
+            "bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 hover:bg-gradient-to-r hover:from-indigo-200 hover:via-purple-200 hover:to-pink-200  hover:text-gray-500 text-white font-semibold",
             {
-              "border-2 border-red-600": !!auth.error, 
+              "border-2 border-red-600": !!auth.error,
             }
           )}
           type="submit"
