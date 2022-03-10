@@ -50,7 +50,7 @@ export const loginAction = createAsyncThunk<
     return res;
   } catch (error: any) {
     toast.error(
-      "⚠️ Error in authuntification, please enter valid email & password or subscribe"
+      "⚠️ Error in authuntification, please enter a valid email & password or subscribe"
     );
     throw new Error(error);
    
@@ -167,6 +167,20 @@ export const authSlice = createSlice({
       state.loading = false;
     });
     builder.addCase(logoutAction.rejected, (state, action) => {
+      state.error = action.error;
+      state.loading = false;
+    });
+    // deleteAccountAction
+    builder.addCase(deleteAccountAction.pending, (state, action) => {
+      state.loading = true;
+    });
+    builder.addCase(deleteAccountAction.fulfilled, (state, action) => {
+      state.user = undefined;
+      state.token = undefined;
+      state.error = undefined;
+      state.loading = false;
+    });
+    builder.addCase(deleteAccountAction.rejected, (state, action) => {
       state.error = action.error;
       state.loading = false;
     });

@@ -6,10 +6,11 @@ import {
   addTaskAction,
   deleteTaskAction,
   getAllTaskAction,
+  //getPaginationAction,
   updateTaskAction,
 } from "../../slices/todo";
 import cn from "classnames";
-import { ToastContainer} from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 interface Task {
@@ -22,6 +23,12 @@ interface Task {
   __v: number;
 }
 
+// interface Pagination {
+//   count: number;
+//   data: [];
+//   limit: number;
+//   skip: number;
+// }
 const TodoApp = () => {
   const [todoDescription, setTodoDescription] = useState("");
   const [modifyItem, setModifyItem] = useState<Task>({} as Task);
@@ -47,14 +54,12 @@ const TodoApp = () => {
   };
 
   const onAddClick = () => {
-  
-      dispatch(addTaskAction({ description: todoDescription, dispatch }));
-      setTodoDescription("");
-     
+    dispatch(addTaskAction({ description: todoDescription, dispatch }));
+    setTodoDescription("");
   };
 
   const onRemoveClick = (_id: string) => {
-      dispatch(deleteTaskAction({ _id, dispatch }));
+    dispatch(deleteTaskAction({ _id, dispatch }));
   };
 
   const onDoneClick = (item: Task) => {
@@ -89,10 +94,17 @@ const TodoApp = () => {
     );
   };
 
+  // const onPagination = (page: Pagination) => {
+  //   dispatch(getPaginationAction({ limit: page.limit, skip: page.skip }));
+  // };
+
   return (
     <div className="flex flex-col border-2  justify-center items-center">
       <header className="w-screen h-20 bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
-        <h1 className="font-bold my-6 text-center text-gray-50">
+        <h1
+          // onClick={onPagination}
+          className="font-bold my-6 text-center text-gray-50"
+        >
           Todo-Homepage
         </h1>
       </header>

@@ -20,6 +20,12 @@ interface InitialState {
   loading?: boolean;
 }
 
+interface getPaginationResponse {
+  count: number;
+  data: [];
+  limit: number;
+  skip: number;
+}
 interface AddTodoResponse {
   success: boolean;
   data: {
@@ -124,6 +130,27 @@ export const updateTaskAction = createAsyncThunk<
   }
 });
 
+export const getPaginationAction = createAsyncThunk<getPaginationResponse, {
+  limit: number;
+  skip: number;
+}>(
+  "todo/pagination",
+  async (data): Promise<getPaginationResponse> => {
+    try {
+      const {limit, skip} = data
+      const res = await call("get", `/task?limit=${limit}&skip=${skip}`, {limit, skip});
+      toast.success("Pagination is done successfully 👋", {
+        autoClose: 1000,
+        delay: 1000,
+      });
+      return res;
+    } catch (error: any) {
+      toast.error("Error in pagination");
+      throw new Error(error);
+    }
+  }
+);
+
 const initialState: InitialState = {
   todos: [],
   error: undefined,
@@ -180,6 +207,18 @@ export const todoSlice = createSlice({
       state.loading = false;
     });
     builder.addCase(updateTaskAction.rejected, (state, action) => {
+      state.error = action.error;
+      state.loading = false;
+    });
+    // getPaginationAction;
+    builder.addCase(getPaginationAction.pending, (state, action) => {
+      state.loading = true;
+    });
+    builder.addCase(getPaginationAction.fulfilled, (state, action) => {
+      state.error = undefined;
+      state.loading = false;
+    });
+    builder.addCase(getPaginationAction.rejected, (state, action) => {
       state.error = action.error;
       state.loading = false;
     });
