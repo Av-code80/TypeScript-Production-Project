@@ -53,7 +53,6 @@ export const loginAction = createAsyncThunk<
       "⚠️ Error in authuntification, please enter a valid email & password or subscribe"
     );
     throw new Error(error);
-   
   }
 });
 
@@ -170,7 +169,7 @@ export const authSlice = createSlice({
       state.error = action.error;
       state.loading = false;
     });
-    // deleteAccountAction
+    // deleteAccountAction => 1 builder
     builder.addCase(deleteAccountAction.pending, (state, action) => {
       state.loading = true;
     });
